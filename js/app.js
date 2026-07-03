@@ -70,7 +70,7 @@ form.addEventListener("submit", function (evento) { //al hacer click en submit d
 
 
 function generarMensajeFinal(plantilla, valorNombre) {
-  return plantilla.mensaje.replaceAll("{nombre}", valorNombre);  //nombre se reemplaza por valor nombre
+  return plantilla.mensajereal.replaceAll("{nombre}", valorNombre);  //nombre se reemplaza por valor nombre
 }
 
 
@@ -87,7 +87,7 @@ function renderSelector() {
   // .innerHTML = ... va a reemplazar todo su contenido con lo que armemos abajo.
   // state.plantillastotales es tu array real de plantillas guardadas.
 
-    .map((plantilla, indice) => `<option value="${indice}">${plantilla.titulo}</option>`)
+    .map((plantilla, indice) => `<option value="${indice}">${plantilla.tituloreal}</option>`)
     // .map() recorre cada plantilla del array y la convierte en un <option>.
     // "plantilla" es el objeto individual en cada vuelta; "indice" es su posición (0,1,2...).
     // value="${indice}" guarda la posición como el valor de esa opción del select.
@@ -124,10 +124,20 @@ document.getElementById("btn-generar").addEventListener("click", function () {
 
 
 document.getElementById("btn-copiar").addEventListener("click", function () {
-  // Se agrega otro escuchador de clics, esta vez al botón "btn-copiar".
+  // Se agrega un escuchador de clics al botón con id="btn-copiar"
 
-  navigator.clipboard.writeText(salida.textContent);
-  // navigator.clipboard es una función del navegador para acceder al portapapeles.
-  // .writeText(...) copia el texto que le pasas — aquí, copia exactamente
-  // lo que está mostrado en "salida" (el mensaje ya armado con el nombre puesto).
+  navigator.clipboard.writeText(salida.textContent)
+  // Intenta copiar el texto de "salida" al portapapeles.
+  // writeText() devuelve una PROMESA (una operación que puede tardar o fallar)
+
+    .then(() => {
+      console.log("✅ Copiado con éxito");
+      // Si la copia funcionó, esto se ejecuta
+    })
+
+    .catch((error) => {
+      console.error("❌ Error al copiar:", error);
+      // Si algo falló (permisos bloqueados, contexto no seguro, etc.),
+      // aquí vas a ver el motivo EXACTO del error
+    });
 });
