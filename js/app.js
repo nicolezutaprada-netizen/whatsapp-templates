@@ -1,6 +1,20 @@
+const titulo = document.getElementById("titulo");
+const mensaje = document.getElementById("mensaje");
+const hashtag = document.getElementById("hashtag");
+
+
+
 const state={
     plantillastotales:[]
 };
+
+state.plantillastotales = cargar(); //carga lo guardado en localStorage
+state.filtro = localStorage.getItem(CLAVE_FILTRO) ?? "";     // recupera el filtro (o vacío)
+document.getElementById("buscador").value = state.filtro;    // muéstralo en el input
+render();  //pinta la pantalla con esos datos
+
+
+
 
 function agregarPlantilla(titulo, mensaje, hashtag){
     const nuevaplantilla=new Template(titulo, mensaje, hashtag);
@@ -14,14 +28,14 @@ function render(){ //pinta
     lista.innerHTML="" ;   //limpia lo anterior (inner htmtl : leer o modificar el contenido HTML dentro de un elemento específico)
     plantillasVisibles().forEach(function (plantilla) { 
 
-        const fechaTexto=plantilla.fechareal.toLocaleDateString("es-PE");  //tocalatedatastring es // "3/7/2026"  ← formato legible peruano
+        const fechaTexto=new Date(plantilla.fechareal).toLocaleDateString("es-PE");  //tocalatedatastring es // "3/7/2026"  ← formato legible peruano
         const li=document.createElement("li");
         li.className="bg-white p-4 rounded-lg shadow"; //p es padding de 1 rem pa los 4 lados y roundd lg es esquina redondeadas grande
        
         li.innerHTML = `
     <div class="flex items-start justify-between gap-2">
     <strong class="text-slate-800">${plantilla.tituloreal}</strong>
-    <span class="text-xs text-slate-400 shrink-0">${plantilla.fechareal.toLocaleDateString("es-PE")}</span>
+    <span class="text-xs text-slate-400 shrink-0">${new Date(plantilla.fechareal).toLocaleDateString("es-PE")}</span> 
     </div>
     <p class="text-sm text-slate-600 mt-1">${plantilla.mensajereal}</p>
     <span class="inline-block text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full mt-2">${plantilla.hashtagreal}</span>
@@ -30,17 +44,22 @@ function render(){ //pinta
     <button class="btn-eliminar text-xs px-2.5 py-1 rounded-md bg-red-50 text-red-600 hover:bg-red-100 transition" data-id="${plantilla.id}">Eliminar</button>
     </div>`;
 
-    
+    //se pone new date () ya que todo se paso a texto entonces ahora debe volver a objeto/array para trabajar con tocolaledatestring
+    //por eso se reconstruye con new date a partir del texto que dejo stringify
     
       lista.appendChild(li);                     // 2. agrega un nodo por dato APPENCHILD permite insertar un nuevo nodo o elemento HTML al final de la lista de hijos de otro elemento padre
       });
   renderSelector(); //
-   renderStats() 
+   renderStats()
+   guardar();   
 }
 
 
 
-
+document.getElementById("btn-vaciar").addEventListener("click", function () {
+  state.plantillastotales = [];
+  render();
+});
   
 
 

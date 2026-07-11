@@ -1,57 +1,38 @@
-# 📱 Plantillas de WhatsApp
+ram## Persistencia de datos (`js/persistence.js`)
 
-Aplicación web para crear, guardar y personalizar plantillas de mensajes de WhatsApp. Permite generar un mensaje final reemplazando un nombre de destinatario y copiarlo directo al portapapeles.
+Las plantillas y el filtro de búsqueda se guardan en `localStorage`, para que no se pierdan al recargar la página o cerrar el navegador.
 
-
-## Cómo usarlo
-
-1. Abre `index.html` en el navegador (o usa **Live Server** en VS Code).
-2. Completa el formulario con título, hashtag y mensaje (puedes incluir `{nombre}` en el mensaje como marcador de posición).
-3. Haz clic en **"Agregar plantilla"** — aparece al instante en la lista.
-4. Elige una plantilla del selector, escribe el nombre del destinatario y haz clic en **"Generar"** para ver el mensaje final.
-5. Haz clic en **"Copiar"** para copiar el mensaje al portapapeles y pegarlo en WhatsApp.
-
-
-
-### Clase `Template` (`js/models/template.js`)
-
-Modela una plantilla de mensaje.
-
-| Propiedad | Descripción |
-|---|---|
-| `tituloreal` | Título de la plantilla |
-| `mensajereal` | Contenido del mensaje (puede incluir `{nombre}`) |
-| `hashtagreal` | Hashtag asociado, normalizado |
-| `fechareal` | Fecha y hora de creación (generada automáticamente con `new Date()`) |
-
-
-## Métodos de String utilizados
-
-| Método | Dónde se usa | Para qué |
-|---|---|---|
-| `.trim()` | `normalizarHashtag()`, al leer `titulo.value` y `mensaje.value` | Elimina espacios en blanco al inicio y al final del texto |
-| `.toLowerCase()` | `normalizarHashtag()` | Convierte el hashtag a minúsculas, para mantener consistencia |
-| `.startsWith("#")` | `normalizarHashtag()` | Verifica si el hashtag ya incluye el símbolo `#`, para no duplicarlo |
-| `.replaceAll("{nombre}", valorNombre)` | `generarMensajeFinal()` | Busca el placeholder `{nombre}` dentro del mensaje y lo reemplaza por el nombre real del destinatario |
-| `.toLocaleDateString("es-PE")` | `render()` (método de `Date`, no de `String`, pero convierte la fecha a texto legible) | Muestra la fecha de creación en formato peruano legible (ej. `3/7/2026`) |
-
-## Delegación de eventos
-
-En vez de agregar un `addEventListener` a cada botón individual (lo cual fallaría, ya que los botones se destruyen y se recrean cada vez que `render()` vuelve a dibujar la lista), el listener se coloca **una sola vez** en el elemento padre `<ul id="listaPlantillas">`. Gracias al *burbujeo de eventos* (event bubbling), un clic en cualquier botón hijo sube hasta el padre y dispara el mismo listener, sin importar si ese botón se creó después de que el listener fue registrado.
+### Guardar (`guardar()`)
 
 ```js
-lista.addEventListener("click", function (evento) {
-  const id = evento.target.dataset.id;
-  if (evento.target.classList.contains("btn-eliminar")) eliminarPlantilla(id);
-  if (evento.target.classList.contains("btn-editar"))   cargarEnFormulario(id);
-});
+function guardar() {
+  state.plantillastotales.length === 0
+    ? localStorage.removeItem(CLAVE)
+    : localStorage.setItem(CLAVE, JSON.stringify(state.plantillastotales));
+
+  localStorage.setItem(CLAVE_FILTRO, state.filtro ?? "");
+
+  document.getElementById("estado").textContent = state.plantillastotales.length > 0 ? "Guardado ✓" : "Vacío";
+}
 ```
 
-| Elemento | Para qué sirve |
-|---|---|
-| `evento.target` | El elemento **exacto** donde ocurrió el clic (el botón, el título, o cualquier otra parte de la tarjeta) |
-| `.classList.contains("btn-eliminar")` | Verifica si el clic fue específicamente sobre el botón de eliminar |
-| `.classList.contains("btn-editar")` | Verifica si el clic fue específicamente sobre el botón de editar |
-| `evento.target.dataset.id` | Lee el atributo `data-id="${plantilla.id}"` guardado en el botón, para saber **cuál** plantilla debe eliminarse o editarse |
+`localStorage` solo puede almacenar texto, así que el arreglo de plantillas se convierte con `JSON.stringify()` antes de guardarse. Si no hay plantillas, se borra la clave directamente con `removeItem()` en vez de guardar un arreglo vacío. El filtro, al ser ya un texto simple, se guarda tal cual, sin `stringify`. `guardar()` se llama automáticamente al final de cada `render()`, así que cualquier cambio de estado (agregar, editar, eliminar, vaciar) queda persistido sin tener que llamarlo manualmente en cada función.
 
-**Ventaja principal:** un solo listener sobrevive a cada `render()` y atiende a **todos** los botones presentes en cualquier momento, sin necesidad de "re-enganchar" eventos cada vez que la lista cambia (se agregan, editan o eliminan plantillas).
+### Cargar (`cargar()`)
+
+```js
+function cargar() {
+  const guardado = localStorage.getItem(CLAVE);
+  if (guardado === null) return [];
+  try {
+    return JSON.parse(guardado);
+  } catch (error) {
+    console.warn("Datos corruptos, empiezo de cero:", error);
+    return [];
+  }
+}
+```
+
+`getItem()` devuelve el texto guardado, o `null` si nunca se guardó nada — en ese caso se retorna un arreglo vacío de inmediato. Si sí hay texto, se usa `JSON.parse()` para reconstruirlo de vuelta a un arreglo de objetos.
+
+**Por qué el `try/catch`:** `JSON.parse()` puede fallar si el texto guardado está corrupto o mal formado (por ejemplo, si el usuario editó manualmente los datos de `localStorage` desde la consola, o el valor quedó incompleto por algún error). Sin protección, ese fallo detendría toda la aplicación. Con `try/catch`, si `JSON.parse()` lanza un error, este se atrapa en el `catch`, se registra en consola con `console.warn()`, y la app sigue funcionando normalmente devolviendo una lista vacía en vez de romperse.
