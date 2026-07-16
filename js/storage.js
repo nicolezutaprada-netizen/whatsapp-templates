@@ -1,3 +1,5 @@
+import { state } from "./state.js";
+
 const CLAVE = "whatsapp-templates";  
 const CLAVE_FILTRO = "whatsapp-templates-filtro";
 
@@ -20,8 +22,6 @@ function guardar() {
 
 
 
-
-
 function cargar() {
   const guardado = localStorage.getItem(CLAVE); // getitem:lee lo que está guardadp
   if (guardado===null) return []; //
@@ -35,3 +35,4 @@ function cargar() {
 
 
 
+export { guardar, cargar, CLAVE, CLAVE_FILTRO };
