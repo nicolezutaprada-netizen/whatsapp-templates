@@ -10,26 +10,39 @@ const hashtag = document.getElementById("hashtag");
 const lista=document.getElementById("listaPlantillas");
 
 
-
 function render(){ //pinta
 
     lista.innerHTML="" ;   //limpia lo anterior (inner htmtl : leer o modificar el contenido HTML dentro de un elemento específico)
-    plantillasVisibles().forEach(function (plantilla) { 
+
+    const visibles = plantillasVisibles();
+
+    if (visibles.length === 0) {
+      // estado vacío amigable: distingue "no hay nada creado" vs "el filtro no encontró nada"
+      const vacio = state.plantillastotales.length === 0
+        ? "Aún no tienes plantillas. ¡Crea la primera!"
+        : "No se encontraron plantillas con ese filtro.";
+      lista.innerHTML = `
+        <li class="sm:col-span-2 text-center text-[var(--text-muted)] py-10">
+          <div class="text-4xl mb-2">💬</div>
+          ${vacio}
+        </li>`;
+    } else {
+      visibles.forEach(function (plantilla) { 
 
         const fechaTexto=new Date(plantilla.fechareal).toLocaleDateString("es-PE");  //tocalatedatastring es // "3/7/2026"  ← formato legible peruano
         const li=document.createElement("li");
-        li.className="bg-white p-4 rounded-lg shadow"; //p es padding de 1 rem pa los 4 lados y roundd lg es esquina redondeadas grande
+        li.className="bubble p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] ml-2"; //p es padding de 1 rem pa los 4 lados y roundd lg es esquina redondeadas grande
        
         li.innerHTML = `
     <div class="flex items-start justify-between gap-2">
-    <strong class="text-slate-800">${plantilla.tituloreal}</strong>
-    <span class="text-xs text-slate-400 shrink-0">${new Date(plantilla.fechareal).toLocaleDateString("es-PE")}</span> 
+    <strong class="font-display text-[var(--text)]">${plantilla.tituloreal}</strong>
+    <span class="font-mono text-[10px] text-[var(--text-muted)] shrink-0">${new Date(plantilla.fechareal).toLocaleDateString("es-PE")}</span> 
     </div>
-    <p class="text-sm text-slate-600 mt-1">${plantilla.mensajereal}</p>
-    <span class="inline-block text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full mt-2">${plantilla.hashtagreal}</span>
-    <div class="flex gap-2 mt-3 pt-2 border-t border-slate-100">
-    <button class="btn-editar text-xs px-2.5 py-1 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100 transition" data-id="${plantilla.id}">Editar</button>
-    <button class="btn-eliminar text-xs px-2.5 py-1 rounded-md bg-red-50 text-red-600 hover:bg-red-100 transition" data-id="${plantilla.id}">Eliminar</button>
+    <p class="text-sm text-[var(--text-muted)] mt-1">${plantilla.mensajereal}</p>
+    <span class="inline-block font-mono text-xs px-2 py-0.5 rounded-full mt-2 border border-[var(--accent)] text-[var(--accent)]">${plantilla.hashtagreal}</span>
+    <div class="flex gap-2 mt-3 pt-2 border-t border-[var(--border)]">
+    <button class="btn-editar text-xs px-2.5 py-1 rounded-md border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition" data-id="${plantilla.id}">Editar</button>
+    <button class="btn-eliminar text-xs px-2.5 py-1 rounded-md bg-[rgba(248,113,113,0.12)] text-[var(--danger)] hover:bg-[rgba(248,113,113,0.22)] transition" data-id="${plantilla.id}">Eliminar</button>
     </div>`;
 
     //se pone new date () ya que todo se paso a texto entonces ahora debe volver a objeto/array para trabajar con tocolaledatestring
@@ -37,11 +50,12 @@ function render(){ //pinta
     
       lista.appendChild(li);                     // 2. agrega un nodo por dato APPENCHILD permite insertar un nuevo nodo o elemento HTML al final de la lista de hijos de otro elemento padre
       });
+    }
+
   renderSelector(); //
    renderStats()
    guardar();   
 }
-
 
 
 // --- Modal de confirmación ---
