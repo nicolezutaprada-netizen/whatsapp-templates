@@ -6,81 +6,138 @@
   <title>Plantillas WhatsApp</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="icon" href="data:,">
+
+  <style>
+    :root{
+      --bg: #0A0E0D;
+      --surface: #121715;
+      --surface-2: #181F1C;
+      --border: #212B27;
+      --text: #E8F4EF;
+      --text-muted: #7E958B;
+      --accent: #2FD9A8;
+      --accent-dark: #1FAE85;
+      --danger: #F87171;
+    }
+    body{ background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; }
+    .font-display{ font-family: 'Sora', sans-serif; }
+    .font-mono{ font-family: 'JetBrains Mono', monospace; }
+
+    /* burbuja de chat: colita triangular a la izquierda */
+    .bubble{ position: relative; }
+    .bubble::after{
+      content: "";
+      position: absolute;
+      left: -6px;
+      top: 16px;
+      width: 12px;
+      height: 12px;
+      background: inherit;
+      border-left: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      transform: rotate(45deg);
+    }
+    /* burbuja de salida (preview del mensaje generado): colita a la derecha, sin borde */
+    .bubble-out{ position: relative; }
+    .bubble-out::after{
+      content: "";
+      position: absolute;
+      right: -6px;
+      top: 16px;
+      width: 12px;
+      height: 12px;
+      background: inherit;
+      transform: rotate(45deg);
+    }
+  </style>
 </head>
 
-<body class="bg-slate-100 min-h-screen p-6">
-  <h1 class="text-3xl font-bold text-center text-slate-800 mb-6">Mis Plantillas</h1>
+<body class="min-h-screen p-6">
+
+  <header class="max-w-5xl mx-auto mb-8">
+    <p class="font-mono text-xs tracking-widest uppercase text-[var(--accent)]">Gestor de mensajes</p>
+    <h1 class="font-display text-3xl font-bold mt-1 text-[var(--text)]">Mis Plantillas</h1>
+  </header>
 
   <!-- Dos columnas: formulario a la izquierda, tarjetas a la derecha -->
   <div class="max-w-5xl mx-auto grid gap-6 md:grid-cols-[320px_1fr]">
 
     <!-- Columna izquierda: formulario -->
     <div class="grid gap-6 self-start">
-      <form id="form-plantilla" class="bg-white p-4 rounded-xl shadow grid gap-2">
-        <input id="titulo"  type="text" placeholder="Título"  class="p-2 border border-slate-300 rounded">
-        <input id="hashtag" type="text" placeholder="hashtag" class="p-2 border border-slate-300 rounded">
-        <textarea id="mensaje" rows="3" placeholder="Mensaje (usa {nombre})" class="p-2 border border-slate-300 rounded"></textarea>
-        <button class="bg-emerald-600 text-white py-2 rounded">Agregar plantilla</button>
+      <form id="form-plantilla" class="p-4 rounded-2xl grid gap-3 bg-[var(--surface)] border border-[var(--border)]">
+        <input id="titulo"  type="text" placeholder="Título"
+               class="w-full p-2.5 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text)] placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition">
+        <input id="hashtag" type="text" placeholder="hashtag"
+               class="w-full p-2.5 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text)] placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition">
+        <textarea id="mensaje" rows="3" placeholder="Mensaje (usa {nombre})"
+               class="w-full p-2.5 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text)] placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition"></textarea>
+        <button class="bg-[var(--accent)] hover:bg-[var(--accent-dark)] text-[#062017] font-display font-semibold py-2.5 rounded-lg transition">Agregar plantilla</button>
       </form>
     </div>
 
     <!-- Columna derecha: buscador + panel de stats + lista de tarjetas, todo junto -->
     <div class="grid gap-4 content-start">
       <input id="buscador" type="text" placeholder="Filtra por hashtag…"
-             class="w-full p-2 border border-slate-300 rounded-lg">
+             class="w-full p-2.5 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-[var(--text)] placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition">
 
-      <select id="orden" class="w-full p-2 border border-slate-300 rounded-lg">
+      <select id="orden" class="w-full p-2.5 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-[var(--text)] outline-none focus:border-[var(--accent)] transition">
         <option value="recientes">Más recientes</option>
         <option value="antiguas">Más antiguas</option>
       </select>
 
-      <aside id="panel-stats" class="bg-slate-100 rounded-lg p-3"></aside>
-      <ul id="listaPlantillas" class="grid gap-3 sm:grid-cols-2 content-start"></ul>
+      <aside id="panel-stats" class="rounded-lg p-3 bg-[var(--surface)] border border-[var(--border)]"></aside>
+      <ul id="listaPlantillas" class="grid gap-4 sm:grid-cols-2 content-start"></ul>
 
-  <div class="flex items-center justify-between border-t border-slate-200 pt-3 mt-1">
-  <p id="estado" class="text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">Listo</p>
-  <button id="btn-vaciar" class="text-xs px-3 py-1.5 rounded-md border border-red-200 text-red-600 hover:bg-red-50 transition">Vaciar todo</button>
-</div>
+      <div class="flex items-center justify-between border-t border-[var(--border)] pt-3 mt-1">
+        <p id="estado" class="font-mono text-xs text-[var(--text-muted)] bg-[var(--surface)] border border-[var(--border)] px-2.5 py-1 rounded-full">Listo</p>
+        <button id="btn-vaciar" class="text-xs px-3 py-1.5 rounded-md border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--danger)] hover:border-[var(--danger)] transition">Vaciar todo</button>
+      </div>
     </div>
 
   </div>
 
-  <section id="generador" class="max-w-5xl mx-auto mt-6 bg-white p-4 rounded-xl shadow grid gap-3">
-    <h2 class="font-bold text-slate-800">✨ Usar plantilla</h2>
+  <section id="generador" class="max-w-5xl mx-auto mt-6 bg-[var(--surface)] p-4 rounded-2xl border border-[var(--border)] grid gap-3">
+    <h2 class="font-display font-bold text-[var(--text)]">✨ Usar plantilla</h2>
 
-    <label class="grid gap-1 text-xs text-slate-500">
+    <label class="grid gap-1 text-xs font-mono text-[var(--text-muted)]">
       Plantilla
-      <select id="selector" class="p-2 border border-slate-300 rounded text-slate-800"></select>
+      <select id="selector" class="p-2.5 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text)] outline-none focus:border-[var(--accent)] transition"></select>
     </label>
 
-    <label class="grid gap-1 text-xs text-slate-500">
+    <label class="grid gap-1 text-xs font-mono text-[var(--text-muted)]">
       Nombre real
-      <input id="valorNombre" type="text" placeholder="ej. Ana" class="p-2 border border-slate-300 rounded text-slate-800">
+      <input id="valorNombre" type="text" placeholder="ej. Ana"
+             class="p-2.5 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text)] placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] transition">
     </label>
 
-    <button id="btn-generar" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded transition">Generar</button>
+    <button id="btn-generar" class="bg-[var(--accent)] hover:bg-[var(--accent-dark)] text-[#062017] font-display font-semibold py-2.5 rounded-lg transition">Generar</button>
 
     <!-- Resultado: el mensaje final y el botón copiar -->
-    <div class="bg-slate-50 border border-slate-200 rounded p-3 grid gap-2">
-      <p id="mensaje-final" class="text-sm text-slate-700 whitespace-pre-wrap min-h-[1.5rem]"></p>
-      <button id="btn-copiar" class="justify-self-end text-xs text-emerald-700 hover:text-emerald-800">📋 Copiar</button>
+    <div class="flex justify-end pt-2">
+      <div class="bubble-out max-w-[80%] bg-[var(--accent)] text-[#062017] rounded-xl rounded-tr-sm p-3 grid gap-2">
+        <p id="mensaje-final" class="text-sm whitespace-pre-wrap min-h-[1.5rem]"></p>
+        <button id="btn-copiar" class="justify-self-end text-xs font-mono text-[#062017]/70 hover:text-[#062017]">📋 Copiar</button>
+      </div>
     </div>
   </section>
 
 
 
-  <div id="modal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+  <div id="modal" class="hidden fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
 
     <!-- hidden=display:none 
      fixed:posicionfija
      inset-0:top:0, right:0, bottom:0, left:0
      -->
-  <div class="bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full text-center">
-    <p id="modal-texto" class="text-slate-700 mb-5">¿Seguro?</p>
+  <div class="bg-[var(--surface)] border border-[var(--border)] p-6 rounded-2xl shadow-xl max-w-sm w-full text-center">
+    <p id="modal-texto" class="text-[var(--text)] mb-5">¿Seguro?</p>
     <div class="flex gap-2 justify-center">
-      <button id="modal-cancelar"  class="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Cancelar</button>
-      <button id="modal-confirmar" class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition">Eliminar</button>
+      <button id="modal-cancelar"  class="px-4 py-2 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text)] hover:border-[var(--accent)] transition">Cancelar</button>
+      <button id="modal-confirmar" class="px-4 py-2 rounded-lg bg-[var(--danger)] text-[#2a0a0a] font-semibold hover:opacity-90 transition">Eliminar</button>
     </div>
   </div>
 </div>

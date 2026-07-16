@@ -1,4 +1,5 @@
-import { Template } from "./template.js";
+
+import { Template } from "./models/template.js";
 
 const state = {
     plantillastotales: []
@@ -33,10 +34,21 @@ function contarPorHashtag(plantillas) {
 
 
 
+function ordenar(plantillas) {
+  const copia = [...plantillas];   // copiamos: .sort() muta el array original
+  return state.orden === "antiguas"
+    ? copia.sort((a, b) => new Date(a.fechareal) - new Date(b.fechareal))   // más antiguas primero
+    : copia.sort((a, b) => new Date(b.fechareal) - new Date(a.fechareal));  // más recientes primero (por defecto)
+}
+
+
+
 function plantillasVisibles() {
   const filtroTexto = (state.filtro ?? "").toLowerCase();  //valor ?? valorPorDefecto
-  if (filtroTexto === "") return state.plantillastotales;
-  return state.plantillastotales.filter(plantilla => plantilla.hashtagreal.toLowerCase().includes(filtroTexto));
+  const filtradas = filtroTexto === ""
+    ? state.plantillastotales
+    : state.plantillastotales.filter(plantilla => plantilla.hashtagreal.toLowerCase().includes(filtroTexto));
+  return ordenar(filtradas);   // primero filtra, luego ordena
 }
 
 
@@ -58,4 +70,4 @@ function generarMensajeFinal(plantilla, valorNombre) {
 
 
 
-export { state, agregarPlantilla, contarPorHashtag, plantillasVisibles, normalizarHashtag, generarMensajeFinal };
+export { state, agregarPlantilla, contarPorHashtag, plantillasVisibles, normalizarHashtag, generarMensajeFinal, ordenar };

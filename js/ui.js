@@ -1,6 +1,8 @@
 import { state, agregarPlantilla, plantillasVisibles, contarPorHashtag, normalizarHashtag, generarMensajeFinal } from "./state.js";
 import { guardar } from "./storage.js";
 
+
+
 const titulo = document.getElementById("titulo");
 const mensaje = document.getElementById("mensaje");
 const hashtag = document.getElementById("hashtag");
@@ -120,6 +122,13 @@ function renderStats() {
 document.getElementById("buscador").addEventListener("input", function (evento) {
   state.filtro = evento.target.value;   // el filtro vive en el estado
   render();                             // mismo render, datos distintos
+});
+
+
+
+document.getElementById("orden").addEventListener("change", function (evento) {
+  state.orden = evento.target.value;   // el orden vive en el estado
+  render();
 });
 
 
